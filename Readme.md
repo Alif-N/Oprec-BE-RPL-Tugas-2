@@ -9,10 +9,10 @@ Application Programming Interface (API) untuk sebuah aplikasi review film dan se
 
 | Method | Endpoint                        |           Deskripsi            |
 | :----- | :------------------------------ | :----------------------------: |
-| GET    | /film | Ambil Semua Kegiatan |
-| POST   | /film | Tambah Kegiatan Baru |
-| PUT    | /film/:id | Update data kegiatan |
-| DELETE | /film/:id | Delete data kegiatan |
+| GET    | /film | Ambil Semua Film |
+| POST   | /film | Tambah Film Baru |
+| PUT    | /film/:id | Update Data Film |
+| DELETE | /film/:id | Delete Data Film |
 | GET    | /film/[keyword] | Cari film berdasarkan judul |
 
 | Method | Endpoint                        |           Deskripsi            |
