@@ -1,5 +1,6 @@
 const Film = require('../models/films');
 const list = require('../models/lists');
+const User = require('../models/users');
 
 const addList = async (req, res) => {
     try {
@@ -37,7 +38,7 @@ const updateListStatus = async (req, res) => {
             id,
             { status },
             { new: true }
-        );
+        ).select('-_id -userId').populate('filmId', 'title -_id');
         if (!updatedList) {
             return res.status(404).json({ message: 'List not found' });
         }
@@ -53,11 +54,16 @@ const updateListStatus = async (req, res) => {
 const getUserLists = async (req, res) => {
     try {
         const { userId } = req.params;
-        const lists = await list.find({ userId });
+        const user = await User.findById(userId).select('username');
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+
+        const lists = await list.find({ userId }).select('-_id -userId').populate('filmId', 'title -_id');
         if (!lists) {
             return res.status(404).json({ message: 'No lists found for this user' });
         }
-        res.status(200).json(lists);
+        res.status(200).json({ username: user.username, lists });
     } catch (error) {
         res.status(500).json({ message: 'Failed to retrieve lists', error });
     }

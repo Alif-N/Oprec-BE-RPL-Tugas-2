@@ -11,32 +11,24 @@ const reactToReview = async (req, res) => {
         const { reaction } = req.body; // "like" atau "dislike"
         const userId = req.user.id;
 
-        // Validasi: User tidak bisa bereaksi ke review miliknya sendiri
         const review = await Review.findById(reviewId);
-        if (review.userId.equals(userId)) {
-            return res.status(403).json({ error: "Tidak boleh bereaksi ke review sendiri" });
-        }
 
-        // Cek apakah user sudah pernah bereaksi
         const existingReaction = await Reaction.findOne({ userId, reviewId });
 
-        // Case 1: User belum pernah bereaksi → Buat reaksi baru
         if (!existingReaction) {
             const newReaction = new Reaction({ userId, reviewId, reaction });
             await newReaction.save();
-            return res.json({ message: `Berhasil ${reaction} review` });
+            return res.json({ message: `Success ${reaction} review` });
         }
 
-        // Case 2: User sudah bereaksi dengan jenis yang sama → Hapus reaksi (toggle)
         if (existingReaction.reaction === reaction) {
             await Reaction.deleteOne({ _id: existingReaction._id });
-            return res.json({ message: "Reaksi dihapus" });
+            return res.json({ message: "Delete Reaction" });
         }
 
-        // Case 3: User ganti reaksi (like → dislike atau sebaliknya) → Update reaksi
         existingReaction.reaction = reaction;
         await existingReaction.save();
-        res.json({ message: `Reaksi diubah menjadi ${reaction}` });
+        res.json({ message: `Reaction changed to ${reaction}` });
 
     } catch (err) {
         res.status(500).json({ error: err.message });

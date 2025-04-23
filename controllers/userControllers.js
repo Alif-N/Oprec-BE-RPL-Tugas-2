@@ -7,12 +7,14 @@ const jwt = require('jsonwebtoken');
 const getUserByUsername = async (req, res) => {
     try {
         const { username } = req.params;
-        const user = await User.findOne({ username });
+        const user = await User.findOne({
+            username: {$regex: username, $options: 'i' },
+            role: { $ne: 'admin' } }).select('-__v -password');
         if (!user) {
             return res.status(404).json({ message: 'User not found' });
         }
 
-        const list = await List.find({ userId: user._id });
+        const list = await List.find({ userId: user._id }).select('-_id -userId').populate('filmId', 'title status -_id');
 
         // Menggunakan agregasi untuk mendapatkan review dengan jumlah like dan dislike
         const reviews = await Review.aggregate([
@@ -48,7 +50,7 @@ const getUserByUsername = async (req, res) => {
                 }
             },
             { $project: { reactions: 0 } } // Sembunyikan array reactions dari output
-        ]);
+        ]).select('-__v -_id').populate('filmId', 'title -_id');
 
         // Menyusun respons berdasarkan data yang tersedia
         return res.status(200).json({
@@ -71,7 +73,7 @@ const updateUser = async (req, res) => {
         if (updates.password) {
             updates.password = await bcrypt.hash(updates.password, 10);
         }
-        const updatedUser = await User.findByIdAndUpdate(id, updates, { new: true });
+        const updatedUser = await User.findByIdAndUpdate(id, updates, { new: true }).select('-_id -__v -password');
         if (!updatedUser) {
             return res.status(404).json({ message: 'User not found' });
         }

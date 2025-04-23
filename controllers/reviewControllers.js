@@ -20,7 +20,7 @@ const createReview = async (req, res) => {
 
 const getReviews = async (req, res) => {
     try {
-        const reviews = await Review.find().populate('userId').populate('filmId');
+        const reviews = await Review.find().populate('userId', 'username -_id').populate('filmId', 'title -_id').select('-__v -_id');
         res.status(200).json(reviews);
     } catch (error) {
         res.status(500).json({ message: error.message });
@@ -30,7 +30,7 @@ const getReviews = async (req, res) => {
 const updateReview = async (req, res) => {
     try {
         const { id } = req.params;
-        const updatedReview = await Review.findByIdAndUpdate(id, req.body, { new: true });
+        const updatedReview = await Review.findByIdAndUpdate(id, req.body, { new: true }).populate('userId', 'username -_id').populate('filmId', 'title -_id').select('-__v -_id');
         if (!updatedReview) {
             return res.status(404).json({ message: 'Review not found' });
         }
@@ -53,37 +53,9 @@ const deleteReview = async (req, res) => {
     }
 }
 
-const likeReview = async (req, res) => {
-    try {
-        const { id } = req.params;
-        const updatedReview = await review.findByIdAndUpdate(id, { $inc: { likes: 1 } }, { new: true });
-        if (!updatedReview) {
-            return res.status(404).json({ message: 'Review not found' });
-        }
-        res.status(200).json(updatedReview);
-    } catch (error) {
-        res.status(500).json({ message: error.message });
-    }
-}
-
-const dislikeReview = async (req, res) => {
-    try {
-        const { id } = req.params;
-        const updatedReview = await review.findByIdAndUpdate(id, { $inc: { dislikes: 1 } }, { new: true });
-        if (!updatedReview) {
-            return res.status(404).json({ message: 'Review not found' });
-        }
-        res.status(200).json(updatedReview);
-    } catch (error) {
-        res.status(500).json({ message: error.message });
-    }
-}
-
 module.exports = {
     createReview,
     getReviews,
     updateReview,
-    deleteReview,
-    likeReview,
-    dislikeReview
+    deleteReview
 };

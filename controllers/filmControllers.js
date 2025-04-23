@@ -2,7 +2,7 @@ const Film = require('../models/films');
 
 const getAllFilms = async (req, res) => {
     try {
-        const films = await Film.find();
+        const films = await Film.find().select('-_id -__v').populate('genres', '-_id name');
         res.status(200).json(films);
     } catch (error) {
         res.status(500).json({ message: 'Failed to fetch films', error });
@@ -12,7 +12,7 @@ const getAllFilms = async (req, res) => {
 const getFilmByJudul = async (req, res) => {
     try {
         const { judul } = req.params;
-        const film = await Film.findOne({ title: { $regex: judul, $options: 'i' } });
+        const film = await Film.findOne({ title: { $regex: judul, $options: 'i' } }).select('-_id').populate('genres', '-_id name');
         if (!film) {
             return res.status(404).json({ message: 'Film not found' });
         }
@@ -25,13 +25,18 @@ const getFilmByJudul = async (req, res) => {
 const createFilm = async (req, res) => {
     try {
         const films = req.body;
+        const existingFilm = await Film.findOne({ title: films.title });
+        if (existingFilm) {
+            return res.status(400).json({ message: `Film ${films.title} already exists` });
+        }
+  
         if (Array.isArray(films)) {
             await Film.insertMany(films);
-            res.status(201).send({ message: 'Films added successfully' });
+            res.status(201).send({ message: `Film ${films.title} added successfully` });
         } else {
             const film = new Film(films);
             await film.save();
-            res.status(201).send({ message: 'Film added successfully' });
+            res.status(201).send({ message: `Film ${films.title} added successfully` });
         }
     } catch (error) {
         console.error(error);
@@ -47,7 +52,7 @@ const updateFilm = async (req, res) => {
             id,
             { title, synopsis, images, genres, status, totalEpisodes, releaseDate },
             { new: true }
-        );
+        ).select('-_id -__v').populate('genres', '-_id name');
         if (!updatedFilm) {
             return res.status(404).json({ message: 'Film not found' });
         }
@@ -64,7 +69,7 @@ const deleteFilm = async (req, res) => {
         if (!deletedFilm) {
             return res.status(404).json({ message: 'Film not found' });
         }
-        res.status(200).json({ message: 'Film deleted successfully' });
+        res.status(200).json({ message: `Film ${deletedFilm.title} deleted successfully` });
     } catch (error) {
         res.status(500).json({ message: 'Failed to delete film', error });
     }
