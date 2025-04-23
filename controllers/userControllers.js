@@ -50,7 +50,7 @@ const getUserByUsername = async (req, res) => {
                 }
             },
             { $project: { reactions: 0 } } // Sembunyikan array reactions dari output
-        ]).select('-__v -_id').populate('filmId', 'title -_id');
+        ]);
 
         // Menyusun respons berdasarkan data yang tersedia
         return res.status(200).json({
