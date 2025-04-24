@@ -45,3 +45,6 @@ Application Programming Interface (API) untuk sebuah aplikasi review film dan se
 | POST   | /review | Tambah Review Baru |
 | PUT    | /review/[reviewId] | Update Review kegiatan |
 | DELETE | /review/[reviewId] | Delete Review kegiatan |
+
+## API Documentation
+https://documenter.getpostman.com/view/44375614/2sB2ixkEQf
